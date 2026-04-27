@@ -22,7 +22,7 @@
     --gold: #f59e0b;
     --worship: #10b981;
     --exercise: #f59e0b;
-    --income: #3b82f6;
+    --Work: #3b82f6;
     --exam: #8b5cf6;
     --rest: #6b7280;
     --safe-top: env(safe-area-inset-top, 0px);
@@ -171,8 +171,8 @@
 
   <div id="stats">
     <div class="stat-chip"><span class="val" style="color:#10b981">~3 hrs</span><span class="lbl">Prayer</span></div>
-    <div class="stat-chip"><span class="val" style="color:#3b82f6">~7.5 hrs</span><span class="lbl">Income</span></div>
-    <div class="stat-chip"><span class="val" style="color:#8b5cf6">~1.5 hrs</span><span class="lbl">Civil Exam</span></div>
+    <div class="stat-chip"><span class="val" style="color:#3b82f6">~7.5 hrs</span><span class="lbl">Work</span></div>
+    <div class="stat-chip"><span class="val" style="color:#8b5cf6">~1.5 hrs</span><span class="lbl">Study</span></div>
     <div class="stat-chip"><span class="val" style="color:#f59e0b">45 min</span><span class="lbl">Exercise</span></div>
     <div class="stat-chip"><span class="val" style="color:#6b7280">~3 hrs</span><span class="lbl">Rest</span></div>
   </div>
@@ -181,8 +181,8 @@
     <div class="ftab active-all" data-filter="all">All</div>
     <div class="ftab" data-filter="worship">🕌 Prayer</div>
     <div class="ftab" data-filter="exercise">🏃 Exercise</div>
-    <div class="ftab" data-filter="income">💰 Income</div>
-    <div class="ftab" data-filter="exam">📝 Civil Exam</div>
+    <div class="ftab" data-filter="Work">💰 Work</div>
+    <div class="ftab" data-filter="exam">📝 Study</div>
     <div class="ftab" data-filter="rest">☕ Rest</div>
   </div>
 
@@ -223,7 +223,7 @@ const SCHEDULE = [
     detail:"Shower, eat a light breakfast. While eating, browse 1–2 health or pharmacy articles — this is content research, not aimless scrolling."
   },
   {
-    time:"06:45", label:"DEEP WORK #1 — Content Production", cat:"income", icon:"🎬", dur:"2 hr 15 min", priority:true,
+    time:"06:45", label:"DEEP WORK #1 — Content Production", cat:"Work", icon:"🎬", dur:"2 hr 15 min", priority:true,
     detail:"Create SiApoteker content: script → generate AI visuals → edit. Goal: 1 finished Reel OR 1 B2B client deliverable. This is your peak cognitive window — protect it ruthlessly. No notifications, no chat, no multitasking."
   },
   {
@@ -231,7 +231,7 @@ const SCHEDULE = [
     detail:"TWK, TIU, TKP practice tests — answer questions, don't read long theory notes. Use apps: CAT BKN, Formasi.id, or Tryout.id. 1 focused hour daily is enough; more is diminishing returns."
   },
   {
-    time:"10:00", label:"DEEP WORK #2 — Pitching & Outreach", cat:"income", icon:"📨", dur:"2 hrs", priority:true,
+    time:"10:00", label:"DEEP WORK #2 — Pitching & Outreach", cat:"Work", icon:"📨", dur:"2 hrs", priority:true,
     detail:"Send brand pitches, follow up on DMs, send B2B proposals to pharmacies and clinics. Target: 5–10 outreaches per day. Use pre-written templates — do not write from scratch every time. Volume is the game at this stage."
   },
   {
@@ -239,7 +239,7 @@ const SCHEDULE = [
     detail:"Dhuhr prayer → dhikr → lunch → rest (max 20 minutes). Do not let this block bleed past 13:00. Short rest here recharges your afternoon without killing momentum."
   },
   {
-    time:"13:00", label:"DEEP WORK #3 — Product Development", cat:"income", icon:"🧪", dur:"2 hrs", priority:true,
+    time:"13:00", label:"DEEP WORK #3 — Product Development", cat:"Work", icon:"🧪", dur:"2 hrs", priority:true,
     detail:"Weeks 1–2: outline and write course material. Weeks 3–4: start recording videos. If you already have a B2B client, use this block to deliver their content. Your online course is your highest-leverage one-time effort."
   },
   {
@@ -247,11 +247,11 @@ const SCHEDULE = [
     detail:"Asr prayer + afternoon dhikr. Use this as a natural movement break — stand up, stretch, reset your posture after hours of sitting."
   },
   {
-    time:"15:20", label:"Admin & Engagement", cat:"income", icon:"💬", dur:"1 hr",
+    time:"15:20", label:"Admin & Engagement", cat:"Work", icon:"💬", dur:"1 hr",
     detail:"Reply to follower comments and DMs, engage with other accounts in the pharmacy/health niche, update your pitch tracker, review weekly account stats. This keeps your algorithm alive and builds community trust."
   },
   {
-    time:"16:20", label:"DEEP WORK #4 — Rasa Tau & Repurpose", cat:"income", icon:"🎨", dur:"1 hr 10 min", priority:true,
+    time:"16:20", label:"DEEP WORK #4 — Rasa Tau & Repurpose", cat:"Work", icon:"🎨", dur:"1 hr 10 min", priority:true,
     detail:"Create or schedule content for Rasa Tau (35K followers). Or repurpose SiApoteker content for TikTok. Do not let this account go dormant — it is a second brand deal pipeline and costs little extra effort to maintain."
   },
   {
@@ -275,7 +275,7 @@ const SCHEDULE = [
     detail:"Record: how many pitches sent, content completed, deals closed. Write exactly 3 priorities for tomorrow. Maximum 30 minutes — this is navigation, not extra work. Without this step, you drift."
   },
   {
-    time:"20:05", label:"Learning & Self-Development", cat:"income", icon:"📚", dur:"55 min",
+    time:"20:05", label:"Learning & Self-Development", cat:"Work", icon:"📚", dur:"55 min",
     detail:"Study one topic: content monetization, copywriting, or pharmacy knowledge updates. Choose one structured source per session — not random videos. This compounds quietly over months."
   },
   {
@@ -288,7 +288,7 @@ const SCHEDULE = [
 ];
 
 const COLORS = {
-  worship:"#10b981", exercise:"#f59e0b", income:"#3b82f6", exam:"#8b5cf6", rest:"#6b7280"
+  worship:"#10b981", exercise:"#f59e0b", Work:"#3b82f6", exam:"#8b5cf6", rest:"#6b7280"
 };
 
 const QUOTES = [
