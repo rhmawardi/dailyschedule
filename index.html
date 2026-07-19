@@ -161,8 +161,8 @@
 <body>
 <div id="app">
   <div id="header">
-    <h1>DAILY SCHEDULE</h1>
-    <div class="sub">Execution Strategy</div>
+    <h1>JADWAL HARIAN</h1>
+    <div class="sub">CPNS, SiApoteker & UKAI App</div>
     <div class="date-row">
       <span id="today-date"></span>
       <span id="quote"></span>
@@ -170,36 +170,36 @@
   </div>
 
   <div id="stats">
-    <div class="stat-chip"><span class="val" style="color:#10b981">~3 hrs</span><span class="lbl">Prayer</span></div>
-    <div class="stat-chip"><span class="val" style="color:#3b82f6">~7.5 hrs</span><span class="lbl">Work</span></div>
-    <div class="stat-chip"><span class="val" style="color:#8b5cf6">~1.5 hrs</span><span class="lbl">Study</span></div>
-    <div class="stat-chip"><span class="val" style="color:#f59e0b">45 min</span><span class="lbl">Exercise</span></div>
-    <div class="stat-chip"><span class="val" style="color:#6b7280">~3 hrs</span><span class="lbl">Rest</span></div>
+    <div class="stat-chip"><span class="val" style="color:#10b981">~2.5 jam</span><span class="lbl">Ibadah</span></div>
+    <div class="stat-chip"><span class="val" style="color:#3b82f6">2 jam</span><span class="lbl">Konten/UKAI</span></div>
+    <div class="stat-chip"><span class="val" style="color:#8b5cf6">~7.5 jam</span><span class="lbl">Belajar CPNS</span></div>
+    <div class="stat-chip"><span class="val" style="color:#f59e0b">30 mnt</span><span class="lbl">Olahraga</span></div>
+    <div class="stat-chip"><span class="val" style="color:#6b7280">~4.5 jam</span><span class="lbl">Istirahat</span></div>
   </div>
 
   <div id="filters">
-    <div class="ftab active-all" data-filter="all">All</div>
-    <div class="ftab" data-filter="worship">🕌 Prayer</div>
-    <div class="ftab" data-filter="exercise">🏃 Exercise</div>
-    <div class="ftab" data-filter="Work">💰 Work</div>
-    <div class="ftab" data-filter="exam">📝 Study</div>
-    <div class="ftab" data-filter="rest">☕ Rest</div>
+    <div class="ftab active-all" data-filter="all">Semua</div>
+    <div class="ftab" data-filter="worship">🕌 Ibadah</div>
+    <div class="ftab" data-filter="exercise">🏃 Olahraga</div>
+    <div class="ftab" data-filter="Work">💻 Konten/UKAI</div>
+    <div class="ftab" data-filter="exam">📝 CPNS</div>
+    <div class="ftab" data-filter="rest">☕ Istirahat</div>
   </div>
 
   <div id="list"></div>
 
   <div id="bottom">
     <div class="progress-row">
-      <span>Today's progress</span>
-      <span><span id="progress-pct">0%</span> &nbsp;·&nbsp; <span id="progress-count">0 / 20 done</span></span>
+      <span>Progres Hari Ini</span>
+      <span><span id="progress-pct">0%</span> &nbsp;·&nbsp; <span id="progress-count">0 / 20 selesai</span></span>
     </div>
     <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
-    <div class="day-note">Tap a block to expand · Tap "Mark done" to track progress</div>
+    <div class="day-note">Ketuk blok untuk detail · Ketuk "Tandai selesai" untuk tracking progres</div>
   </div>
 </div>
 
 <div id="install-banner">
-  <p>📲 <span>Install as App</span> — open from your home screen, no browser needed</p>
+  <p>📲 <span>Install sebagai Aplikasi</span> — buka dari home screen, tanpa browser</p>
   <button id="install-btn">Install</button>
   <button id="close-banner">✕</button>
 </div>
@@ -207,80 +207,85 @@
 <script>
 const SCHEDULE = [
   {
-    time:"04:00", label:"Wake Up & Prepare", cat:"worship", icon:"🌙", dur:"30 min",
-    detail:"Optional Tahajjud prayer. Perform wudu, mentally set your intention for the day. The way you start your morning determines the quality of your entire day."
+    time:"04:00", label:"Bangun & Sholat Subuh", cat:"worship", icon:"🕌", dur:"30 mnt",
+    detail:"Bangun, Sholat Subuh + dzikir/tilawah singkat."
   },
   {
-    time:"04:30", label:"Fajr Prayer + Quran Recitation", cat:"worship", icon:"🕌", dur:"45 min",
-    detail:"Fajr prayer → morning dhikr → Quran recitation for 15–20 minutes. Target: 1 page per day. Consistent daily reading = complete Quran in ~1 year."
+    time:"04:30", label:"Mandi & Peregangan", cat:"rest", icon:"💧", dur:"30 mnt",
+    detail:"Mandi, minum air, peregangan ringan."
   },
   {
-    time:"05:15", label:"Exercise", cat:"exercise", icon:"🏃", dur:"45 min",
-    detail:"Jogging / calisthenics / stretching. No gym required — consistency beats intensity every time. Morning is the easiest time to stay consistent; no excuses exist yet."
+    time:"05:00", label:"Blok CPNS #1", cat:"exam", icon:"📝", dur:"2 jam", priority:true,
+    detail:"Materi baru (TWK/TIU), fokus penuh selagi otak segar."
   },
   {
-    time:"06:00", label:"Shower + Breakfast", cat:"rest", icon:"🍳", dur:"45 min",
-    detail:"Shower, eat a light breakfast. While eating, browse 1–2 health or pharmacy articles — this is content research, not aimless scrolling."
+    time:"07:00", label:"Olahraga", cat:"exercise", icon:"🏃", dur:"30 mnt",
+    detail:"Jalan cepat/HIIT ringan atau resistance training."
   },
   {
-    time:"06:45", label:"DEEP WORK #1 — Content Production", cat:"Work", icon:"🎬", dur:"2 hr 15 min", priority:true,
-    detail:"Create SiApoteker content: script → generate AI visuals → edit. Goal: 1 finished Reel OR 1 B2B client deliverable. This is your peak cognitive window — protect it ruthlessly. No notifications, no chat, no multitasking."
+    time:"07:30", label:"Sarapan", cat:"rest", icon:"🍳", dur:"30 mnt",
+    detail:"Sarapan."
   },
   {
-    time:"09:00", label:"Civil Servant Exam Practice", cat:"exam", icon:"📝", dur:"1 hr",
-    detail:"TWK, TIU, TKP practice tests — answer questions, don't read long theory notes. Use apps: CAT BKN, Formasi.id, or Tryout.id. 1 focused hour daily is enough; more is diminishing returns."
+    time:"08:00", label:"Blok CPNS #2", cat:"exam", icon:"📝", dur:"2 jam", priority:true,
+    detail:"Latihan soal + bahas jawaban salah."
   },
   {
-    time:"10:00", label:"DEEP WORK #2 — Pitching & Outreach", cat:"Work", icon:"📨", dur:"2 hrs", priority:true,
-    detail:"Send brand pitches, follow up on DMs, send B2B proposals to pharmacies and clinics. Target: 5–10 outreaches per day. Use pre-written templates — do not write from scratch every time. Volume is the game at this stage."
+    time:"10:00", label:"Jeda", cat:"rest", icon:"☕", dur:"15 mnt",
+    detail:"Jeda."
   },
   {
-    time:"12:00", label:"Dhuhr Prayer + Lunch Break", cat:"worship", icon:"🕌", dur:"1 hr",
-    detail:"Dhuhr prayer → dhikr → lunch → rest (max 20 minutes). Do not let this block bleed past 13:00. Short rest here recharges your afternoon without killing momentum."
+    time:"10:15", label:"Blok CPNS #3", cat:"exam", icon:"📝", dur:"1 jam 25 mnt", priority:true,
+    detail:"TKP atau materi paling lemah."
   },
   {
-    time:"13:00", label:"DEEP WORK #3 — Product Development", cat:"Work", icon:"🧪", dur:"2 hrs", priority:true,
-    detail:"Weeks 1–2: outline and write course material. Weeks 3–4: start recording videos. If you already have a B2B client, use this block to deliver their content. Your online course is your highest-leverage one-time effort."
+    time:"11:45", label:"Sholat Dzuhur & Makan Siang", cat:"worship", icon:"🕌", dur:"1 jam 15 mnt",
+    detail:"Sholat Dzuhur + makan siang + istirahat sampai 13:00."
   },
   {
-    time:"15:00", label:"Asr Prayer", cat:"worship", icon:"🕌", dur:"20 min",
-    detail:"Asr prayer + afternoon dhikr. Use this as a natural movement break — stand up, stretch, reset your posture after hours of sitting."
-  },
-   {
-    time:"15:20", label:"DEEP WORK #4", cat:"Work", icon:"🎨", dur:"1 hr 10 min", priority:true,
-    detail:"Create or schedule content for Rasa Tau (35K followers). Or repurpose SiApoteker content for TikTok. Do not let this account go dormant — it is a second brand deal pipeline and costs little extra effort to maintain."
+    time:"13:00", label:"Slot Konten / UKAI App", cat:"Work", icon:"💻", dur:"2 jam", priority:true,
+    detail:"Rotasi harian:<br/>Senin: SiApoteker (naskah+take video)<br/>Selasa: UKAI App (progres kecil)<br/>Rabu: SiApoteker (editing+posting)<br/>Kamis: UKAI App (lanjutan progres)<br/>Jumat: Buffer (kejar bagian belum selesai)."
   },
   {
-    time:"17:00", label:"Free Time", cat:"rest", icon:"☕", dur:"30 min",
-    detail:"Full stop. No laptop, step away from your phone. This is a deliberate recharge before evening prayer and night study. Skipping rest does not make you more productive — it makes you worse the next day."
+    time:"15:10", label:"Sholat Ashar", cat:"worship", icon:"🕌", dur:"20 mnt",
+    detail:"Sholat Ashar."
   },
   {
-    time:"18:00", label:"Maghrib Prayer + Quran Recitation", cat:"worship", icon:"🌅", dur:"45 min",
-    detail:"Maghrib prayer → Quran recitation (1 page) → evening dhikr. This is your daily anchor of stillness. Guard it."
+    time:"15:30", label:"Blok CPNS #4", cat:"exam", icon:"📝", dur:"1 jam 30 mnt", priority:true,
+    detail:"Review kesalahan + rangkuman poin penting."
   },
   {
-    time:"18:45", label:"Dinner + Family Time", cat:"rest", icon:"🍽️", dur:"30 min",
-    detail:"Eat dinner, spend time with family or housemates. This is not work time. Human connection is part of sustainable productivity."
+    time:"17:00", label:"Waktu Bebas / Istirahat", cat:"rest", icon:"☕", dur:"50 mnt",
+    detail:"Waktu bebas / istirahat sebelum Maghrib."
   },
   {
-    time:"19:15", label:"Isha Prayer", cat:"worship", icon:"🕌", dur:"20 min",
-    detail:"Isha prayer + wirid. Set your intention for tomorrow before you sleep."
+    time:"17:50", label:"Sholat Maghrib", cat:"worship", icon:"🌅", dur:"10 mnt",
+    detail:"Sholat Maghrib."
   },
   {
-    time:"19:35", label:"Daily Review + Tomorrow's Plan", cat:"exam", icon:"📋", dur:"30 min",
-    detail:"Record: how many pitches sent, content completed, deals closed. Write exactly 3 priorities for tomorrow. Maximum 30 minutes — this is navigation, not extra work. Without this step, you drift."
+    time:"18:00", label:"Makan Malam + Istirahat", cat:"rest", icon:"🍽️", dur:"1 jam",
+    detail:"Makan malam + istirahat."
   },
   {
-    time:"20:05", label:"Learning & Self-Development", cat:"Work", icon:"📚", dur:"55 min",
-    detail:"Study one topic: content monetization, copywriting, or pharmacy knowledge updates. Choose one structured source per session — not random videos. This compounds quietly over months."
+    time:"19:00", label:"Sholat Isya", cat:"worship", icon:"🕌", dur:"15 mnt",
+    detail:"Sholat Isya."
   },
   {
-    time:"21:00", label:"Wind Down", cat:"rest", icon:"🌙", dur:"30 min",
-    detail:"Put your phone away, turn off notifications. Dim the lights. Prepare your body and mind for quality sleep. What you do in these 30 minutes determines whether you wake up at 04:00 tomorrow."
+    time:"19:15", label:"Review Ringan CPNS", cat:"exam", icon:"📚", dur:"1 jam",
+    detail:"Review ringan CPNS — flashcard/soal cepat (bukan materi baru)."
   },
   {
-    time:"21:30", label:"Sleep", cat:"rest", icon:"😴", dur:"6.5 hrs",
-    detail:"6.5 hours of sleep to wake at 04:00 in peak condition. Sleep is not laziness — it is recovery infrastructure. Every skipped hour costs you cognitive performance the next day. Non-negotiable."}
+    time:"20:15", label:"Waktu Pribadi / Keluarga", cat:"rest", icon:"👨‍👩‍👦", dur:"1 jam 15 mnt",
+    detail:"Waktu pribadi / keluarga."
+  },
+  {
+    time:"21:30", label:"Evaluasi Harian & Persiapan", cat:"rest", icon:"📋", dur:"1 jam",
+    detail:"Evaluasi harian singkat + persiapan tidur."
+  },
+  {
+    time:"22:30", label:"Tidur", cat:"rest", icon:"😴", dur:"5.5 jam",
+    detail:"Tidur."
+  }
 ];
 
 const COLORS = {
@@ -288,8 +293,8 @@ const COLORS = {
 };
 
 const QUOTES = [
-  "Execution beats perfection.", "Start before you're ready.", "Revenue solves problems.",
-  "One deep work session at a time.", "Consistency is the strategy.", "Ship it, then improve it."
+  "Eksekusi lebih penting dari kesempurnaan.", "Mulai sebelum kamu merasa siap.", "Konsistensi adalah kunci.",
+  "Satu sesi fokus demi satu sesi.", "Sedikit demi sedikit, lama-lama menjadi bukit.", "Kerjakan, lalu sempurnakan."
 ];
 
 let done = {};
@@ -366,7 +371,7 @@ function renderList(){
             <button class="done-btn"
               onclick="event.stopPropagation();toggleDone(${gi})"
               style="background:${isDone?color+'33':'transparent'};border:1px solid ${color}66;color:${color};">
-              ${isDone?'✓ Done — tap to undo':'Mark as done'}
+              ${isDone?'✓ Selesai — ketuk untuk batal':'Tandai selesai'}
             </button>
           </div>
         </div>
@@ -392,7 +397,7 @@ function updateProgress(){
   const total = SCHEDULE.length;
   const completed = Object.values(done).filter(Boolean).length;
   const pct = Math.round(completed/total*100);
-  document.getElementById('progress-count').textContent = `${completed} / ${total} done`;
+  document.getElementById('progress-count').textContent = `${completed} / ${total} selesai`;
   document.getElementById('progress-pct').textContent = `${pct}%`;
   document.getElementById('progress-fill').style.width = `${pct}%`;
 }
