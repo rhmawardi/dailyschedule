@@ -331,11 +331,6 @@
   <input type="file" id="import-file" accept=".json" style="display:none;" />
 
   <div id="list"></div>
-  
-  <div id="journal-container" style="padding: 0 20px 20px 20px;">
-    <div style="font-size:11px; font-weight:700; color:var(--muted); margin-bottom:8px; text-transform:uppercase;">📝 Jurnal Harian</div>
-    <textarea id="journal-input" placeholder="Apa hal terbaik yang terjadi hari ini? Atau apa yang perlu diperbaiki besok?" style="width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:12px; color:#f8fafc; font-size:12px; font-family:inherit; resize:none; outline:none; min-height:80px;"></textarea>
-  </div>
 
   <div id="bottom">
     <div class="progress-row">
@@ -480,7 +475,6 @@ let confettiFired = false;
 let exp = 0;
 let level = 1;
 let badges = [];
-let dailyJournal = "";
 
 function loadDone(){
   const lastDate = localStorage.getItem('jadwal_date');
@@ -493,7 +487,6 @@ function loadDone(){
   exp = parseInt(localStorage.getItem('jadwal_exp')||'0');
   level = parseInt(localStorage.getItem('jadwal_level')||'1');
   badges = JSON.parse(localStorage.getItem('jadwal_badges')||'[]');
-  dailyJournal = localStorage.getItem('jadwal_journal_' + today) || "";
   
   if (lastStreakDateStr && lastStreakDateStr !== today) {
     const lastD = new Date(lastStreakDateStr);
@@ -1006,17 +999,8 @@ function renderBadgesUI() {
   }).join('');
 }
 
-const journalInput = document.getElementById('journal-input');
-if(journalInput) {
-  journalInput.addEventListener('input', (e) => {
-    dailyJournal = e.target.value;
-    localStorage.setItem('jadwal_journal_' + new Date().toDateString(), dailyJournal);
-  });
-}
-
 // Init
 loadDone();
-if(journalInput) journalInput.value = dailyJournal;
 renderBadgesUI();
 setHeader();
 renderList();
