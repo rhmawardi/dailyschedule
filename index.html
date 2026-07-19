@@ -211,7 +211,11 @@
     <div class="ftab" data-filter="exam">📝 CPNS</div>
     <div class="ftab" data-filter="rest">☕ Istirahat</div>
     <div class="ftab" id="history-btn" style="background:var(--surface2); border-color:var(--border);">📊 Riwayat</div>
+    <div class="ftab" id="export-btn" style="background:var(--surface2); border-color:var(--border);">📤 Export</div>
+    <div class="ftab" id="import-btn" style="background:var(--surface2); border-color:var(--border);">📥 Import</div>
   </div>
+
+  <input type="file" id="import-file" accept=".json" style="display:none;" />
 
   <div id="list"></div>
 
@@ -246,32 +250,32 @@
 <script>
 const SCHEDULE = [
   {
-    time:"04:00", label:"Bangun & Sholat Subuh", cat:"worship", icon:"🕌", dur:"30 mnt",
-    detail:"Bangun, Sholat Subuh + dzikir/tilawah singkat."
+    time:"04:30", label:"Bangun & Sholat Subuh", cat:"worship", icon:"🕌", dur:"30 mnt",
+    detail:"Bangun, minum air · Sholat Subuh + dzikir/tilawah singkat."
   },
   {
-    time:"04:30", label:"Mandi & Peregangan", cat:"rest", icon:"💧", dur:"30 mnt",
+    time:"05:00", label:"Mandi & Peregangan", cat:"rest", icon:"💧", dur:"5 mnt",
     detail:"Mandi, minum air, peregangan ringan."
   },
   {
-    time:"05:00", label:"Blok CPNS #1", cat:"exam", icon:"📝", dur:"2 jam", priority:true,
+    time:"05:05", label:"Blok CPNS #1", cat:"exam", icon:"📝", dur:"55 mnt", priority:true,
     detail:"Materi baru (TWK/TIU), fokus penuh selagi otak segar."
   },
   {
-    time:"07:00", label:"Olahraga", cat:"exercise", icon:"🏃", dur:"30 mnt",
+    time:"06:05", label:"Olahraga", cat:"exercise", icon:"🏃", dur:"40 mnt",
     detail:"Jalan cepat/HIIT ringan atau resistance training."
   },
   {
-    time:"07:30", label:"Sarapan", cat:"rest", icon:"🍳", dur:"30 mnt",
-    detail:"Sarapan."
+    time:"06:45", label:"Mandi & Sarapan", cat:"rest", icon:"🍳", dur:"30 mnt",
+    detail:"Mandi - Sarapan Telur."
   },
   {
-    time:"08:00", label:"Blok CPNS #2", cat:"exam", icon:"📝", dur:"2 jam", priority:true,
+    time:"07:15", label:"Blok CPNS #2", cat:"exam", icon:"📝", dur:"2 jam 45 mnt", priority:true,
     detail:"Latihan soal + bahas jawaban salah."
   },
   {
-    time:"10:00", label:"Jeda", cat:"rest", icon:"☕", dur:"15 mnt",
-    detail:"Jeda."
+    time:"10:00", label:"Jeda & Berjemur", cat:"rest", icon:"☕", dur:"15 mnt",
+    detail:"Jeda dan Berjemur Matahari."
   },
   {
     time:"10:15", label:"Blok CPNS #3", cat:"exam", icon:"📝", dur:"1 jam 25 mnt", priority:true,
@@ -310,19 +314,19 @@ const SCHEDULE = [
     detail:"Sholat Isya."
   },
   {
-    time:"19:15", label:"Review Ringan CPNS", cat:"exam", icon:"📚", dur:"1 jam",
-    detail:"Review ringan CPNS — flashcard/soal cepat (bukan materi baru)."
+    time:"19:15", label:"Self Development", cat:"Work", icon:"📚", dur:"1 jam",
+    detail:"Belajar Bahasa asing ataupun membaca hal lain."
   },
   {
-    time:"20:15", label:"Waktu Pribadi / Keluarga", cat:"rest", icon:"👨‍👩‍👦", dur:"1 jam 15 mnt",
+    time:"20:15", label:"Waktu Pribadi / Keluarga", cat:"rest", icon:"👨‍👩‍👦", dur:"1 jam 45 mnt",
     detail:"Waktu pribadi / keluarga."
   },
   {
-    time:"21:30", label:"Evaluasi Harian & Persiapan", cat:"rest", icon:"📋", dur:"1 jam",
+    time:"22:00", label:"Evaluasi Harian & Persiapan", cat:"rest", icon:"📋", dur:"30 mnt",
     detail:"Evaluasi harian singkat + persiapan tidur."
   },
   {
-    time:"22:30", label:"Tidur", cat:"rest", icon:"😴", dur:"5.5 jam",
+    time:"22:30", label:"Tidur", cat:"rest", icon:"😴", dur:"6 jam",
     detail:"Tidur."
   }
 ];
@@ -672,6 +676,50 @@ if('serviceWorker' in navigator){
   const sw=`const C='schedule-v1';self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(['/']))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>r))));`;
   navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
 }
+
+// Backup & Restore
+document.getElementById('export-btn').addEventListener('click', () => {
+  const data = {
+    jadwal_done: localStorage.getItem('jadwal_done'),
+    jadwal_date: localStorage.getItem('jadwal_date'),
+    jadwal_history: localStorage.getItem('jadwal_history'),
+    jadwal_streak: localStorage.getItem('jadwal_streak'),
+    jadwal_last_streak_date: localStorage.getItem('jadwal_last_streak_date')
+  };
+  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `dailyschedule-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('import-btn').addEventListener('click', () => {
+  document.getElementById('import-file').click();
+});
+
+document.getElementById('import-file').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (data.jadwal_done !== undefined) localStorage.setItem('jadwal_done', data.jadwal_done || '{}');
+      if (data.jadwal_date !== undefined) localStorage.setItem('jadwal_date', data.jadwal_date || '');
+      if (data.jadwal_history !== undefined) localStorage.setItem('jadwal_history', data.jadwal_history || '[]');
+      if (data.jadwal_streak !== undefined) localStorage.setItem('jadwal_streak', data.jadwal_streak || '0');
+      if (data.jadwal_last_streak_date !== undefined) localStorage.setItem('jadwal_last_streak_date', data.jadwal_last_streak_date || '');
+      
+      alert('Data berhasil di-import! Halaman akan dimuat ulang.');
+      window.location.reload();
+    } catch(err) {
+      alert('File backup tidak valid!');
+    }
+  };
+  reader.readAsText(file);
+});
 
 // Init
 loadDone();
