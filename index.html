@@ -9,6 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Daily Schedule"/>
 <title>Daily Schedule – Rizky</title>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <link rel="manifest" id="manifest-placeholder"/>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
@@ -156,6 +157,27 @@
     vertical-align:middle;
   }
   @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(1.3);}}
+
+  .header-badges { display:flex; gap: 8px; margin-top: 10px; }
+  .badge-streak { font-size: 11px; font-weight: 700; color: #f97316; background: #fff1f211; padding: 4px 8px; border-radius: 6px; display:inline-flex; align-items:center; gap: 4px; border: 1px solid #f9731644; }
+  .badge-countdown { font-size: 11px; font-weight: 700; color: #ef4444; background: #fef2f211; padding: 4px 8px; border-radius: 6px; display:inline-flex; align-items:center; gap: 4px; border: 1px solid #ef444444; }
+  
+  .pomodoro-btn { margin-top:0; padding:5px 14px; border-radius:7px; font-size:11px; font-weight:700; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; transition:all 0.15s; background:var(--surface2); color:#fff; border:1px solid var(--border); margin-left: 8px; display: inline-flex; align-items: center; justify-content: center; min-width: 130px; }
+  .pomodoro-btn.active { background: #ef4444; color: #fff; border-color: #ef4444; animation: pulse 2s infinite; }
+
+  #history-modal { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(15,23,42,0.9); z-index:200; display:flex; flex-direction:column; justify-content:flex-end; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+  #history-modal.show { opacity:1; pointer-events:auto; }
+  .history-content { background:var(--surface); border-top-left-radius:20px; border-top-right-radius:20px; padding:20px; padding-bottom:calc(20px + var(--safe-bottom)); border-top:1px solid var(--border); transform:translateY(100%); transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  #history-modal.show .history-content { transform:translateY(0); }
+  .history-header { display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; }
+  .history-header h3 { font-size: 16px; font-weight: 700; color: #f1f5f9; }
+  .close-history { background:transparent; border:none; color:var(--muted); font-size: 20px; cursor:pointer; }
+  .chart-container { display:flex; align-items:flex-end; justify-content:space-between; height: 120px; gap: 8px; padding-top: 20px; }
+  .chart-bar-wrap { display:flex; flex-direction:column; align-items:center; flex: 1; gap: 8px; }
+  .chart-bar-bg { width: 100%; max-width: 24px; height: 100px; background: var(--surface2); border-radius: 4px; display: flex; align-items: flex-end; overflow: hidden; position: relative; }
+  .chart-bar-fill { width: 100%; background: #10b981; border-radius: 4px; transition: height 0.5s; min-height: 4px; }
+  .chart-lbl { font-size: 9px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+  .chart-val { font-size: 9px; color: #cbd5e1; position: absolute; width: 100%; text-align: center; top: -16px; font-weight: 700; z-index: 2; }
 </style>
 </head>
 <body>
@@ -166,6 +188,10 @@
     <div class="date-row">
       <span id="today-date"></span>
       <span id="quote"></span>
+    </div>
+    <div class="header-badges">
+      <span class="badge-countdown" id="countdown-badge">⏳ ...</span>
+      <span class="badge-streak" id="streak-badge">🔥 0 Hari</span>
     </div>
   </div>
 
@@ -184,6 +210,7 @@
     <div class="ftab" data-filter="Work">💻 Konten/UKAI</div>
     <div class="ftab" data-filter="exam">📝 CPNS</div>
     <div class="ftab" data-filter="rest">☕ Istirahat</div>
+    <div class="ftab" id="history-btn" style="background:var(--surface2); border-color:var(--border);">📊 Riwayat</div>
   </div>
 
   <div id="list"></div>
@@ -202,6 +229,18 @@
   <p>📲 <span>Install sebagai Aplikasi</span> — buka dari home screen, tanpa browser</p>
   <button id="install-btn">Install</button>
   <button id="close-banner">✕</button>
+</div>
+
+<div id="history-modal">
+  <div class="history-content">
+    <div class="history-header">
+      <h3>Riwayat 7 Hari Terakhir</h3>
+      <button class="close-history" id="close-history-btn">✕</button>
+    </div>
+    <div class="chart-container" id="chart-container">
+      <!-- bars will be injected here -->
+    </div>
+  </div>
 </div>
 
 <script>
@@ -301,13 +340,34 @@ let done = {};
 let currentFilter = 'all';
 let openIdx = -1;
 
+let streak = 0;
+let historyData = [];
+let activePomodoro = { gi: null, timeLeft: 0, interval: null, mode: 'focus' };
+let confettiFired = false;
+
 function loadDone(){
   const lastDate = localStorage.getItem('jadwal_date');
   const today = new Date().toDateString();
+  
+  historyData = JSON.parse(localStorage.getItem('jadwal_history')||'[]');
+  streak = parseInt(localStorage.getItem('jadwal_streak')||'0');
+  let lastStreakDateStr = localStorage.getItem('jadwal_last_streak_date');
+  
+  if (lastStreakDateStr && lastStreakDateStr !== today) {
+    const lastD = new Date(lastStreakDateStr);
+    const now = new Date();
+    const diffDays = Math.floor((now - lastD) / (1000 * 60 * 60 * 24));
+    if (diffDays > 1) {
+      streak = 0;
+      localStorage.setItem('jadwal_streak', streak);
+    }
+  }
+
   if(lastDate !== today){
     done = {};
     localStorage.setItem('jadwal_done','{}');
     localStorage.setItem('jadwal_date', today);
+    confettiFired = false;
   } else {
     done = JSON.parse(localStorage.getItem('jadwal_done')||'{}');
   }
@@ -316,6 +376,32 @@ function loadDone(){
 function saveDone(){
   localStorage.setItem('jadwal_done', JSON.stringify(done));
   localStorage.setItem('jadwal_date', new Date().toDateString());
+  
+  const total = SCHEDULE.length;
+  const completed = Object.values(done).filter(Boolean).length;
+  const pct = Math.round(completed/total*100);
+  
+  const d = new Date();
+  const todayStr = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+  let todayEntry = historyData.find(h => h.date === todayStr);
+  if (todayEntry) {
+    todayEntry.pct = pct;
+  } else {
+    historyData.push({ date: todayStr, pct: pct });
+    if(historyData.length > 7) historyData.shift();
+  }
+  localStorage.setItem('jadwal_history', JSON.stringify(historyData));
+  
+  if (pct >= 80) {
+    const today = new Date().toDateString();
+    const lastStreakDate = localStorage.getItem('jadwal_last_streak_date');
+    if (lastStreakDate !== today) {
+      streak++;
+      localStorage.setItem('jadwal_streak', streak);
+      localStorage.setItem('jadwal_last_streak_date', today);
+    }
+  }
+  updateStreakUI();
 }
 
 function getCurrentBlockIndex(){
@@ -367,12 +453,18 @@ function renderList(){
         </div>
         <div class="card-detail${openIdx===gi?' open':''}">
           ${item.detail}
-          <div>
-            <button class="done-btn"
+          <div style="display:flex; align-items:center; flex-wrap:wrap; margin-top:10px;">
+            <button class="done-btn" style="margin-top:0;"
               onclick="event.stopPropagation();toggleDone(${gi})"
               style="background:${isDone?color+'33':'transparent'};border:1px solid ${color}66;color:${color};">
               ${isDone?'✓ Selesai — ketuk untuk batal':'Tandai selesai'}
             </button>
+            ${(item.cat === 'exam' || item.cat === 'Work') ? `
+              <button class="pomodoro-btn ${activePomodoro.gi === gi ? 'active' : ''}" 
+                onclick="event.stopPropagation();togglePomodoro(${gi})">
+                ${activePomodoro.gi === gi ? `⏱ ${formatTime(activePomodoro.timeLeft)}` : '🍅 Mulai Fokus (50m)'}
+              </button>
+            ` : ''}
           </div>
         </div>
       </div>
@@ -393,6 +485,41 @@ function toggleDone(gi){
   renderList();
 }
 
+function formatTime(secs) {
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+function togglePomodoro(gi) {
+  if (activePomodoro.gi === gi) {
+    clearInterval(activePomodoro.interval);
+    activePomodoro.gi = null;
+  } else {
+    if (activePomodoro.interval) clearInterval(activePomodoro.interval);
+    activePomodoro.gi = gi;
+    activePomodoro.mode = 'focus';
+    activePomodoro.timeLeft = 50 * 60;
+    
+    activePomodoro.interval = setInterval(() => {
+      activePomodoro.timeLeft--;
+      if (activePomodoro.timeLeft <= 0) {
+        if (activePomodoro.mode === 'focus') {
+          alert('Sesi fokus selesai! Waktunya istirahat 10 menit.');
+          activePomodoro.mode = 'rest';
+          activePomodoro.timeLeft = 10 * 60;
+        } else {
+          alert('Istirahat selesai! Kembali fokus atau tandai selesai.');
+          clearInterval(activePomodoro.interval);
+          activePomodoro.gi = null;
+        }
+      }
+      renderList();
+    }, 1000);
+  }
+  renderList();
+}
+
 function updateProgress(){
   const total = SCHEDULE.length;
   const completed = Object.values(done).filter(Boolean).length;
@@ -400,16 +527,74 @@ function updateProgress(){
   document.getElementById('progress-count').textContent = `${completed} / ${total} selesai`;
   document.getElementById('progress-pct').textContent = `${pct}%`;
   document.getElementById('progress-fill').style.width = `${pct}%`;
+  
+  if (pct === 100 && !confettiFired) {
+    confettiFired = true;
+    if(window.confetti) {
+      window.confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+    }
+  }
 }
 
 function setHeader(){
-  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
   const d = new Date();
   document.getElementById('today-date').textContent =
-    `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`;
+    `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]}`;
   const q = QUOTES[d.getDay() % QUOTES.length];
   document.getElementById('quote').textContent = `"${q}"`;
+  
+  const target = new Date('2026-09-01T00:00:00');
+  const diff = target - d;
+  const diffDays = Math.ceil(diff / (1000 * 60 * 60 * 24));
+  document.getElementById('countdown-badge').textContent = `⏳ ${diffDays > 0 ? diffDays : 0} Hari Menuju CPNS`;
+  
+  updateStreakUI();
+}
+
+function updateStreakUI() {
+  const badge = document.getElementById('streak-badge');
+  if(badge) badge.textContent = `🔥 ${streak} Hari`;
+}
+
+// History Modal
+document.getElementById('history-btn').addEventListener('click', () => {
+  renderChart();
+  document.getElementById('history-modal').classList.add('show');
+});
+
+document.getElementById('close-history-btn').addEventListener('click', () => {
+  document.getElementById('history-modal').classList.remove('show');
+});
+
+function renderChart() {
+  const container = document.getElementById('chart-container');
+  let displayData = [...historyData];
+  while (displayData.length < 7) {
+    displayData.unshift({ date: '-', pct: 0 });
+  }
+  displayData = displayData.slice(-7);
+  
+  const days = ['M','S','S','R','K','J','S'];
+  
+  container.innerHTML = displayData.map(d => {
+    let dayName = '-';
+    if (d.date !== '-') {
+       const dateObj = new Date(d.date);
+       dayName = days[dateObj.getDay()];
+    }
+    const color = d.pct >= 80 ? '#10b981' : (d.pct >= 50 ? '#f59e0b' : '#ef4444');
+    return `
+      <div class="chart-bar-wrap">
+        <div class="chart-bar-bg">
+          <div class="chart-val" style="bottom:${d.pct}%;">${d.pct > 0 ? d.pct : ''}</div>
+          <div class="chart-bar-fill" style="height:${d.pct}%; background:${color};"></div>
+        </div>
+        <div class="chart-lbl">${dayName}</div>
+      </div>
+    `;
+  }).join('');
 }
 
 // Filter tabs
