@@ -250,6 +250,11 @@
   .chart-bar-fill { width: 100%; background: #10b981; border-radius: 4px; transition: height 0.5s; min-height: 4px; }
   .chart-lbl { font-size: 9px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
   .chart-val { font-size: 9px; color: #cbd5e1; position: absolute; width: 100%; text-align: center; top: -16px; font-weight: 700; z-index: 2; }
+  .insight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px; }
+  .insight-card { background: var(--surface2); padding: 14px 10px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  .insight-title { font-size: 10px; color: var(--muted); font-weight: 700; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
+  .insight-val { font-size: 22px; font-weight: 900; font-family: 'Plus Jakarta Sans', sans-serif; }
+  .insight-msg { font-size: 10px; color: #94a3b8; margin-top: 6px; line-height: 1.3; }
 </style>
 </head>
 <body>
@@ -299,9 +304,10 @@
     <div class="ftab" data-filter="Work">💻 Konten/UKAI</div>
     <div class="ftab" data-filter="exam">📝 CPNS</div>
     <div class="ftab" data-filter="rest">☕ Istirahat</div>
-    <div class="ftab" id="history-btn" style="background:var(--surface2); border-color:var(--border);">📊 Riwayat</div>
+    <div class="ftab" id="history-btn" style="background:var(--surface2); border-color:var(--border);">📊 Insight & Report</div>
     <div class="ftab" id="export-btn" style="background:var(--surface2); border-color:var(--border);">📤 Export</div>
     <div class="ftab" id="import-btn" style="background:var(--surface2); border-color:var(--border);">📥 Import</div>
+    <div class="ftab" id="reset-btn" style="background:#ef444433; border-color:#ef444466; color:#ef4444;">⚠️ Reset Program</div>
   </div>
 
   <input type="file" id="import-file" accept=".json" style="display:none;" />
@@ -327,11 +333,17 @@
 <div id="history-modal">
   <div class="history-content">
     <div class="history-header">
-      <h3>Riwayat 7 Hari Terakhir</h3>
+      <h3>Insight & Report</h3>
       <button class="close-history" id="close-history-btn">✕</button>
     </div>
+    
+    <div style="font-size:11px; color:var(--muted); font-weight:600; margin-bottom:10px; letter-spacing:0.5px;">GRAFIK 7 HARI TERAKHIR</div>
     <div class="chart-container" id="chart-container">
       <!-- bars will be injected here -->
+    </div>
+    
+    <div class="insight-grid" id="insight-grid">
+      <!-- insight cards injected here -->
     </div>
   </div>
 </div>
@@ -481,7 +493,7 @@ function saveDone(){
     todayEntry.pct = pct;
   } else {
     historyData.push({ date: todayStr, pct: pct });
-    if(historyData.length > 7) historyData.shift();
+    if(historyData.length > 90) historyData.shift(); // Simpan hingga 90 hari
   }
   localStorage.setItem('jadwal_history', JSON.stringify(historyData));
   
@@ -685,11 +697,11 @@ function renderChart() {
   while (displayData.length < 7) {
     displayData.unshift({ date: '-', pct: 0 });
   }
-  displayData = displayData.slice(-7);
+  const chartData = displayData.slice(-7);
   
   const days = ['M','S','S','R','K','J','S'];
   
-  container.innerHTML = displayData.map(d => {
+  container.innerHTML = chartData.map(d => {
     let dayName = '-';
     if (d.date !== '-') {
        const dateObj = new Date(d.date);
@@ -706,6 +718,32 @@ function renderChart() {
       </div>
     `;
   }).join('');
+  
+  const actualData = historyData.filter(d => d.date !== '-');
+  const last7 = actualData.slice(-7);
+  const weeklyAvg = last7.length ? Math.round(last7.reduce((sum, d) => sum + d.pct, 0) / last7.length) : 0;
+  
+  const last30 = actualData.slice(-30);
+  const monthlyAvg = last30.length ? Math.round(last30.reduce((sum, d) => sum + d.pct, 0) / last30.length) : 0;
+  
+  const weeklyMsg = weeklyAvg >= 80 ? "Hebat! Pertahankan🔥" : (weeklyAvg >= 50 ? "Lumayan, tingkatkan!💪" : "Ayo lebih konsisten!🚀");
+  const monthlyMsg = monthlyAvg >= 80 ? "Performa solid bulan ini!🌟" : (monthlyAvg >= 50 ? "Terus berproses!📈" : "Mulai dari sekarang!🌱");
+  
+  const insightGrid = document.getElementById('insight-grid');
+  if (insightGrid) {
+    insightGrid.innerHTML = `
+      <div class="insight-card">
+        <div class="insight-title">Weekly Average</div>
+        <div class="insight-val" style="color: ${weeklyAvg >= 80 ? '#10b981' : (weeklyAvg >= 50 ? '#f59e0b' : '#ef4444')}">${weeklyAvg}%</div>
+        <div class="insight-msg">${weeklyMsg}</div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-title">Monthly Average</div>
+        <div class="insight-val" style="color: ${monthlyAvg >= 80 ? '#10b981' : (monthlyAvg >= 50 ? '#f59e0b' : '#ef4444')}">${monthlyAvg}%</div>
+        <div class="insight-msg">${monthlyMsg}</div>
+      </div>
+    `;
+  }
 }
 
 // Filter tabs
@@ -812,6 +850,19 @@ document.getElementById('import-file').addEventListener('change', (e) => {
     }
   };
   reader.readAsText(file);
+});
+
+// Reset Program
+document.getElementById('reset-btn').addEventListener('click', () => {
+  if (confirm("Apakah Anda yakin ingin me-reset seluruh data program? (Semua riwayat progres dan streak akan dihapus permanen)")) {
+    localStorage.removeItem('jadwal_done');
+    localStorage.removeItem('jadwal_date');
+    localStorage.removeItem('jadwal_history');
+    localStorage.removeItem('jadwal_streak');
+    localStorage.removeItem('jadwal_last_streak_date');
+    alert("Program berhasil direset. Halaman akan dimuat ulang.");
+    window.location.reload();
+  }
 });
 
 // Init
