@@ -30,22 +30,36 @@
     --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-  html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;overflow:hidden;}
+  html,body{height:100%;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;overflow:hidden;}
+  body{background:var(--bg);position:relative;}
+  body::before{
+    content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(ellipse 80% 50% at 10% 20%, rgba(245,158,11,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 90% 80%, rgba(139,92,246,0.05) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 30% at 50% 50%, rgba(16,185,129,0.04) 0%, transparent 50%);
+  }
+  @keyframes bgShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 
-  #app{display:flex;flex-direction:column;height:100%;padding-top:var(--safe-top);}
+  #app{display:flex;flex-direction:column;height:100%;padding-top:var(--safe-top);position:relative;z-index:1;}
 
   #header{
     background:linear-gradient(180deg,#0f172a 0%,rgba(15,23,42,0.95) 100%);
     padding:16px 20px 12px;
     border-bottom:1px solid var(--border);
-    flex-shrink:0;
+    flex-shrink:0;position:relative;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  #header::after{
+    content:'';position:absolute;bottom:-1px;left:10%;right:10%;height:1px;
+    background:linear-gradient(90deg,transparent,#f59e0b33,transparent);
   }
   #header h1{
     font-family:'Playfair Display',serif;
     font-size:22px;font-weight:900;
     background:linear-gradient(90deg,#f59e0b,#fbbf24);
     -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-    letter-spacing:0.5px;
+    letter-spacing:0.5px;display:inline-block;
   }
   #header .sub{font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:2px;font-weight:300;}
   #header .date-row{margin-top:8px;display:flex;justify-content:space-between;align-items:center;}
@@ -55,13 +69,17 @@
   #stats{
     display:flex;gap:8px;padding:12px 20px;overflow-x:auto;flex-shrink:0;
     scrollbar-width:none;border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg,rgba(30,41,59,0.3) 0%,transparent 100%);
   }
   #stats::-webkit-scrollbar{display:none;}
   .stat-chip{
-    flex-shrink:0;background:var(--surface);border-radius:20px;
+    flex-shrink:0;background:rgba(30,41,59,0.6);border-radius:20px;
     padding:6px 14px;display:flex;flex-direction:column;align-items:center;
     border:1px solid var(--border);min-width:76px;
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    transition:transform 0.2s,box-shadow 0.2s;
   }
+  .stat-chip:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.3);}
   .stat-chip .val{font-size:13px;font-weight:700;margin-bottom:2px;}
   .stat-chip .lbl{font-size:9px;color:var(--muted);letter-spacing:0.5px;white-space:nowrap;}
 
@@ -73,16 +91,33 @@
   .ftab{
     flex-shrink:0;padding:5px 14px;border-radius:16px;font-size:11px;font-weight:600;
     border:1px solid var(--border);background:var(--surface);color:var(--muted);
-    cursor:pointer;transition:all 0.15s;white-space:nowrap;
+    cursor:pointer;transition:all 0.2s;white-space:nowrap;
     font-family:'Plus Jakarta Sans',sans-serif;
   }
-  .ftab.active-all{background:#f59e0b;color:#000;border-color:#f59e0b;}
+  .ftab:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.2);}
+  .ftab:active{transform:scale(0.95);}
+  .ftab.active-all{background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#000;border-color:#f59e0b;box-shadow:0 2px 12px rgba(245,158,11,0.3);}
 
-  #list{flex:1;overflow-y:auto;padding:12px 16px 20px;scrollbar-width:thin;scrollbar-color:var(--surface2) transparent;}
-  #list::-webkit-scrollbar{width:3px;}
-  #list::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:2px;}
+  #list{flex:1;overflow-y:auto;padding:12px 16px 20px;scrollbar-width:thin;scrollbar-color:var(--surface2) transparent;scroll-behavior:smooth;}
+  #list::-webkit-scrollbar{width:4px;}
+  #list::-webkit-scrollbar-track{background:transparent;}
+  #list::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--surface2),#334155);border-radius:3px;}
 
-  .item{display:flex;gap:12px;margin-bottom:6px;align-items:flex-start;}
+  .item{
+    display:flex;gap:12px;margin-bottom:6px;align-items:flex-start;
+    animation:itemIn 0.4s ease-out both;
+  }
+  @keyframes itemIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  .item:nth-child(1){animation-delay:0s}
+  .item:nth-child(2){animation-delay:0.04s}
+  .item:nth-child(3){animation-delay:0.08s}
+  .item:nth-child(4){animation-delay:0.12s}
+  .item:nth-child(5){animation-delay:0.16s}
+  .item:nth-child(6){animation-delay:0.2s}
+  .item:nth-child(7){animation-delay:0.24s}
+  .item:nth-child(8){animation-delay:0.28s}
+  .item:nth-child(9){animation-delay:0.32s}
+  .item:nth-child(10){animation-delay:0.36s}
   .timeline{display:flex;flex-direction:column;align-items:center;width:44px;flex-shrink:0;}
   .t-time{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:0.3px;margin-bottom:4px;font-variant-numeric:tabular-nums;}
   .t-line{width:1px;flex-grow:1;min-height:16px;opacity:0.35;}
@@ -91,35 +126,42 @@
     flex:1;border-radius:12px;padding:11px 14px;
     border:1px solid var(--border);background:var(--surface);
     border-left-width:3px;cursor:pointer;
-    transition:transform 0.15s,box-shadow 0.15s;will-change:transform;
+    transition:transform 0.2s,box-shadow 0.2s;will-change:transform;
+    box-shadow:0 1px 3px rgba(0,0,0,0.2);
   }
+  .card:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,0.3);}
   .card:active{transform:scale(0.98);}
-  .card.highlight{background:var(--surface2);}
-  .card.done-card{opacity:0.45;}
+  .card.highlight{background:linear-gradient(135deg,rgba(243,244,246,0.05) 0%,var(--surface2) 100%);}
+  .card.done-card{opacity:0.4;filter:grayscale(0.5);}
+  .card.done-card:hover{opacity:0.55;}
 
   .card-top{display:flex;justify-content:space-between;align-items:center;gap:8px;}
   .card-left{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
-  .card-emoji{font-size:15px;flex-shrink:0;}
+  .card-emoji{font-size:15px;flex-shrink:0;transition:transform 0.2s;}
+  .card:hover .card-emoji{transform:scale(1.15);}
   .card-title{font-size:13px;font-weight:500;color:#cbd5e1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .card.highlight .card-title{font-weight:700;color:#f1f5f9;}
   .card.done-card .card-title{text-decoration:line-through;color:var(--muted);}
   .badge{font-size:8px;padding:2px 6px;border-radius:8px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;flex-shrink:0;color:#fff;}
   .card-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
   .card-dur{font-size:10px;font-weight:600;}
-  .chevron{font-size:11px;color:var(--muted);transition:transform 0.2s;display:inline-block;}
+  .chevron{font-size:11px;color:var(--muted);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);display:inline-block;}
   .chevron.open{transform:rotate(180deg);}
 
   .card-detail{
     font-size:12px;color:#94a3b8;line-height:1.65;
     margin-top:10px;padding-top:9px;
-    border-top:1px solid var(--border);display:none;
+    border-top:1px solid var(--border);
+    display:grid;grid-template-rows:0fr;transition:grid-template-rows 0.35s cubic-bezier(0.4,0,0.2,1);
   }
-  .card-detail.open{display:block;}
+  .card-detail.open{grid-template-rows:1fr;}
+  .card-detail > div{overflow:hidden;}
   .done-btn{
     margin-top:10px;padding:5px 14px;border-radius:7px;
     font-size:11px;font-weight:700;cursor:pointer;
-    font-family:'Plus Jakarta Sans',sans-serif;transition:all 0.15s;
+    font-family:'Plus Jakarta Sans',sans-serif;transition:all 0.2s;
   }
+  .done-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.3);}
 
   #bottom{
     flex-shrink:0;padding:10px 20px;
@@ -129,10 +171,40 @@
   }
   .progress-row{display:flex;justify-content:space-between;align-items:center;}
   .progress-row span{font-size:10px;color:var(--muted);}
-  #progress-pct{font-weight:700;color:#f59e0b;}
+  #linear-pct{font-weight:700;color:#f59e0b;}
   .progress-bar{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;}
   .progress-fill{height:100%;background:linear-gradient(90deg,#10b981,#3b82f6,#f59e0b);border-radius:2px;transition:width 0.4s cubic-bezier(.4,0,.2,1);}
-  .day-note{font-size:10px;color:var(--muted);text-align:center;line-height:1.4;}
+  .circular-chart {
+    display: block;
+    margin: 0;
+    max-width: 50px;
+    max-height: 50px;
+  }
+  .circle-bg {
+    fill: none;
+    stroke: var(--surface2);
+    stroke-width: 3.8;
+  }
+  .circle {
+    fill: none;
+    stroke-width: 2.8;
+    stroke-linecap: round;
+    transition: stroke-dasharray 1s ease-out, stroke 1s ease-out;
+    filter: drop-shadow(0 0 4px rgba(245,158,11,0.3));
+  }
+  .percentage {
+    fill: #f59e0b;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.5em;
+    font-weight: 800;
+    text-anchor: middle;
+  }
+  .progress-text-col {
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .progress-title { font-size: 13px; font-weight: 700; color: #f1f5f9; }
+  .progress-subtitle { font-size: 11px; color: var(--muted); }
+  .day-note { font-size: 10px; color: var(--muted); line-height: 1.4; margin-top: 4px; }
 
   #install-banner{
     position:fixed;bottom:0;left:0;right:0;
@@ -149,7 +221,7 @@
 
   .current-block{
     border:1px solid #f59e0b66 !important;
-    box-shadow:0 0 0 2px #f59e0b22;
+    box-shadow:0 0 0 2px #f59e0b22, 0 0 20px rgba(245,158,11,0.08);
   }
   .now-dot{
     display:inline-block;width:6px;height:6px;border-radius:50%;
@@ -183,15 +255,32 @@
 <body>
 <div id="app">
   <div id="header">
-    <h1>JADWAL HARIAN</h1>
-    <div class="sub">CPNS, SiApoteker & UKAI App</div>
-    <div class="date-row">
-      <span id="today-date"></span>
-      <span id="quote"></span>
+    <div class="header-info">
+      <h1>JADWAL HARIAN</h1>
+      <div class="sub">CPNS, SiApoteker & UKAI App</div>
+      <div class="date-row">
+        <span id="today-date"></span>
+        <span id="quote"></span>
+      </div>
+      <div class="header-badges">
+        <span class="badge-streak" id="streak-badge">🔥 0 Hari</span>
+      </div>
     </div>
-    <div class="header-badges">
-      <span class="badge-score" id="score-badge">🎯 0%</span>
-      <span class="badge-streak" id="streak-badge">🔥 0 Hari</span>
+    <div class="header-progress">
+       <svg viewBox="0 0 36 36" class="circular-chart" style="width:55px;height:55px;">
+         <path class="circle-bg"
+           d="M18 2.0845
+             a 15.9155 15.9155 0 0 1 0 31.831
+             a 15.9155 15.9155 0 0 1 0 -31.831"
+         />
+         <path class="circle" id="progress-circle"
+           stroke-dasharray="0, 100"
+           d="M18 2.0845
+             a 15.9155 15.9155 0 0 1 0 31.831
+             a 15.9155 15.9155 0 0 1 0 -31.831"
+         />
+         <text x="18" y="20.35" class="percentage" id="progress-pct">0%</text>
+       </svg>
     </div>
   </div>
 
@@ -222,7 +311,7 @@
   <div id="bottom">
     <div class="progress-row">
       <span>Progres Hari Ini</span>
-      <span><span id="progress-pct">0%</span> &nbsp;·&nbsp; <span id="progress-count">0 / 20 selesai</span></span>
+      <span><span id="linear-pct">0%</span> &nbsp;·&nbsp; <span id="progress-count">0 / 20 selesai</span></span>
     </div>
     <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
     <div class="day-note">Ketuk blok untuk detail · Ketuk "Tandai selesai" untuk tracking progres</div>
@@ -461,19 +550,21 @@ function renderList(){
           </div>
         </div>
         <div class="card-detail${openIdx===gi?' open':''}">
-          ${item.detail}
-          <div style="display:flex; align-items:center; flex-wrap:wrap; margin-top:10px;">
-            <button class="done-btn" style="margin-top:0;"
-              onclick="event.stopPropagation();toggleDone(${gi})"
-              style="background:${isDone?color+'33':'transparent'};border:1px solid ${color}66;color:${color};">
-              ${isDone?'✓ Selesai — ketuk untuk batal':'Tandai selesai'}
-            </button>
-            ${(item.cat === 'exam' || item.cat === 'Work') ? `
-              <button class="pomodoro-btn ${activePomodoro.gi === gi ? 'active' : ''}" 
-                onclick="event.stopPropagation();togglePomodoro(${gi})">
-                ${activePomodoro.gi === gi ? `⏱ ${formatTime(activePomodoro.timeLeft)}` : '🍅 Mulai Fokus (50m)'}
+          <div>
+            ${item.detail}
+            <div style="display:flex; align-items:center; flex-wrap:wrap; margin-top:10px;">
+              <button class="done-btn" style="margin-top:0;"
+                onclick="event.stopPropagation();toggleDone(${gi})"
+                style="background:${isDone?color+'33':'transparent'};border:1px solid ${color}66;color:${color};">
+                ${isDone?'✓ Selesai — ketuk untuk batal':'Tandai selesai'}
               </button>
-            ` : ''}
+              ${(item.cat === 'exam' || item.cat === 'Work') ? `
+                <button class="pomodoro-btn ${activePomodoro.gi === gi ? 'active' : ''}" 
+                  onclick="event.stopPropagation();togglePomodoro(${gi})">
+                  ${activePomodoro.gi === gi ? `⏱ ${formatTime(activePomodoro.timeLeft)}` : '🍅 Mulai Fokus (50m)'}
+                </button>
+              ` : ''}
+            </div>
           </div>
         </div>
       </div>
@@ -534,20 +625,22 @@ function updateProgress(){
   const completed = Object.values(done).filter(Boolean).length;
   const pct = Math.round(completed/total*100);
   document.getElementById('progress-count').textContent = `${completed} / ${total} selesai`;
-  document.getElementById('progress-pct').textContent = `${pct}%`;
-  document.getElementById('progress-fill').style.width = `${pct}%`;
   
-  const scoreBadge = document.getElementById('score-badge');
-  if (scoreBadge) {
-    scoreBadge.textContent = `🎯 ${pct}%`;
-    if (pct > 70) {
-      scoreBadge.style.color = '#10b981';
-      scoreBadge.style.borderColor = '#10b98144';
-      scoreBadge.style.background = '#ecfdf511';
-    } else {
-      scoreBadge.style.color = '#f59e0b';
-      scoreBadge.style.borderColor = '#f59e0b44';
-      scoreBadge.style.background = '#fffbeb11';
+  const linearPct = document.getElementById('linear-pct');
+  if(linearPct) linearPct.textContent = `${pct}%`;
+  
+  const fill = document.getElementById('progress-fill');
+  if(fill) fill.style.width = `${pct}%`;
+  
+  const circle = document.getElementById('progress-circle');
+  if (circle) {
+    circle.setAttribute('stroke-dasharray', `${pct}, 100`);
+    const color = pct >= 80 ? '#10b981' : (pct >= 50 ? '#f59e0b' : '#ef4444');
+    circle.style.stroke = color;
+    const pctText = document.getElementById('progress-pct');
+    if (pctText) {
+      pctText.textContent = `${pct}%`;
+      pctText.style.fill = color;
     }
   }
   
