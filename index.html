@@ -920,7 +920,7 @@ if('serviceWorker' in navigator){
 }
 
 // Backup & Restore
-document.getElementById('export-btn').addEventListener('click', () => {
+function exportData(filename) {
   const data = {
     jadwal_done: localStorage.getItem('jadwal_done'),
     jadwal_date: localStorage.getItem('jadwal_date'),
@@ -935,10 +935,26 @@ document.getElementById('export-btn').addEventListener('click', () => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `dailyschedule-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.download = filename || `dailyschedule-backup-${new Date().toISOString().slice(0,10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+document.getElementById('export-btn').addEventListener('click', () => {
+  exportData();
 });
+
+// Auto-Backup setiap hari
+function checkAutoBackup() {
+  const today = new Date().toDateString();
+  const lastBackup = localStorage.getItem('jadwal_last_auto_backup');
+  if (lastBackup !== today) {
+    exportData(`dailyschedule-autobackup-${new Date().toISOString().slice(0,10)}.json`);
+    localStorage.setItem('jadwal_last_auto_backup', today);
+  }
+}
+document.addEventListener('click', checkAutoBackup);
+document.addEventListener('touchstart', checkAutoBackup, { passive: true });
 
 document.getElementById('import-btn').addEventListener('click', () => {
   document.getElementById('import-file').click();
